@@ -1,56 +1,54 @@
 %%%%%%%%%% Condition is Bulb 1 %%%%%%%%%%
 % Is Bulb if 4 neighbor cell is black or number cell
-isBulb([X, Y], _, _) :-
-	Xg is X+1, Xl is X-1, Yg is Y+1, Yl is Y-1,
-	not(whiteCell([Xg, Y])),
-	not(whiteCell([Xl, Y])),
-	not(whiteCell([X, Yg])),
-	not(whiteCell([X, Yl])).
+isBulb([X, Y], _) :-
+	R is X+1, L is X-1, U is Y+1, D is Y-1,
+	not(whiteCell([R, Y])),
+	not(whiteCell([L, Y])),
+	not(whiteCell([X, U])),
+	not(whiteCell([X, D])).
 
 %%%%%%%%%% Condition is Bulb 2 %%%%%%%%%%
 % Check if can put Bulb in Cell
-canBulbHere([X, Y], Lighted, NotBulbs, 0) :-
+canBulbHere([X, Y], Lighted, 0) :-
 	member([X, Y], Lighted);
-	member([X, Y], NotBulbs);
 	not(whiteCell([X, Y])).
-canBulbHere(_, _, _, 1).
+canBulbHere(_, _, 1).
 
 % Check if number cell enough Bulb neighbor
-isNeedBulb([X, Y, Number], Lighted, NotBulbs) :-
-	Xg is X+1, canBulbHere([Xg, Y], Lighted, NotBulbs, N1),
-	Xl is X-1, canBulbHere([Xl, Y], Lighted, NotBulbs, N2),
-	Yg is Y+1, canBulbHere([X, Yg], Lighted, NotBulbs, N3),
-	Yl is Y-1, canBulbHere([X, Yl], Lighted, NotBulbs, N4),
+isNeedBulb([X, Y, Number], Lighted) :-
+	R is X+1, canBulbHere([R, Y], Lighted, N1),
+	L is X-1, canBulbHere([L, Y], Lighted, N2),
+	U is Y+1, canBulbHere([X, U], Lighted, N3),
+	D is Y-1, canBulbHere([X, D], Lighted, N4),
 	Number =:= N1 + N2 + N3 + N4.
 
-% Is Bulb if put Bulb in [X, Y] and a neighbor number cell is full
-isBulb([X, Y], Lighted, NotBulbs) :- 
-	Xg is X+1, numberCell([Xg, Y, Number]), isNeedBulb([Xg, Y, Number], Lighted, NotBulbs);
-	Xl is X-1, numberCell([Xl, Y, Number]), isNeedBulb([Xl, Y, Number], Lighted, NotBulbs);
-	Yg is Y+1, numberCell([X, Yg, Number]), isNeedBulb([X, Yg, Number], Lighted, NotBulbs);
-	Yl is Y-1, numberCell([X, Yl, Number]), isNeedBulb([X, Yl, Number], Lighted, NotBulbs).
+% Is Bulb if put Bulb in [X, Y] and a neighbor number cell can be satisfy
+isBulb([X, Y], Lighted) :- 
+	R is X+1, numberCell([R, Y, Number]), isNeedBulb([R, Y, Number], Lighted);
+	L is X-1, numberCell([L, Y, Number]), isNeedBulb([L, Y, Number], Lighted);
+	U is Y+1, numberCell([X, U, Number]), isNeedBulb([X, U, Number], Lighted);
+	D is Y-1, numberCell([X, D, Number]), isNeedBulb([X, D, Number], Lighted).
 
 %%%%%%%%%% Condition is Bulb 3 %%%%%%%%%%
 % Check if in line not have another white Cell
-isNotLightedInLine([X, Y], Lighted, NotBulbs, DX, DY) :- 
+isNotLightedInLine([X, Y], Lighted, DX, DY) :- 
 	NX is X + DX, NY is Y + DY,
 	not(whiteCell([NX, NY])).
 
-isNotLightedInLine([X, Y], Lighted, NotBulbs, DX, DY) :- 
+isNotLightedInLine([X, Y], Lighted, DX, DY) :- 
 	NX is X + DX, NY is Y + DY,
-	not(member([NX, NY], Lighted)), 
-	not(member([NX, NY], NotBulbs)), !, fail.
+	not(member([NX, NY], Lighted)), !, fail.
 
-isNotLightedInLine([X, Y], Lighted, NotBulbs, DX, DY) :- 
+isNotLightedInLine([X, Y], Lighted, DX, DY) :- 
 	NX is X + DX, NY is Y + DY,
-	isNotLightedInLine([NX, NY], Lighted, NotBulbs, DX, DY).	
+	isNotLightedInLine([NX, NY], Lighted, DX, DY).	
 
 % Check if only it can light itself
-isBulb([X, Y], Lighted, NotBulbs) :-
-	isNotLightedInLine([X, Y], Lighted, NotBulbs, 0, 1),
-	isNotLightedInLine([X, Y], Lighted, NotBulbs, 0, -1),
-	isNotLightedInLine([X, Y], Lighted, NotBulbs, 1, 0),
-	isNotLightedInLine([X, Y], Lighted, NotBulbs, -1, 0).
+isBulb([X, Y], Lighted) :-
+	isNotLightedInLine([X, Y], Lighted, 0, 1),
+	isNotLightedInLine([X, Y], Lighted, 0, -1),
+	isNotLightedInLine([X, Y], Lighted, 1, 0),
+	isNotLightedInLine([X, Y], Lighted, -1, 0).
 
 %%%%%%%%%% Condition is lighted 1 %%%%%%%%%%
 % Check if a Bulb in line
@@ -64,7 +62,7 @@ isBulbInLine([X, Y], Bulbs, DX, DY) :-
 
 isBulbInLine([X, Y], Bulbs, DX, DY) :- 
 	NX is X + DX, NY is Y + DY,
-	isBulbInLine([NX, NY], Bulbs,DX, DY).	
+	isBulbInLine([NX, NY], Bulbs, DX, DY).	
 
 % Check if a cell is Lighted
 isLighted([X, Y], Bulbs) :-
@@ -73,7 +71,7 @@ isLighted([X, Y], Bulbs) :-
 	isBulbInLine([X, Y], Bulbs, 1, 0);
 	isBulbInLine([X, Y], Bulbs, -1, 0).
 
-%%%%%%%%%% Condition is Not Bulb 1 %%%%%%%%%%
+%%%%%%%%%% Condition is Lighted 2 %%%%%%%%%%
 % Check if can put Bulb in Cell
 isBulbHere([X, Y], Bulbs, 1) :-
 	member([X, Y], Bulbs).
@@ -81,48 +79,41 @@ isBulbHere(_, _, 0).
 
 % Check if number cell enough Bulb neighbor
 isFullBulb([X, Y, Number], Bulbs) :-
-	Xg is X+1, isBulbHere([Xg, Y], Bulbs, N1),
-	Xl is X-1, isBulbHere([Xl, Y], Bulbs, N2),
-	Yg is Y+1, isBulbHere([X, Yg], Bulbs, N3),
-	Yl is Y-1, isBulbHere([X, Yl], Bulbs, N4),
+	R is X+1, isBulbHere([R, Y], Bulbs, N1),
+	L is X-1, isBulbHere([L, Y], Bulbs, N2),
+	U is Y+1, isBulbHere([X, U], Bulbs, N3),
+	D is Y-1, isBulbHere([X, D], Bulbs, N4),
 	Number =:= N1 + N2 + N3 + N4.
 
-% Is Bulb if put Bulb in [X, Y] and a neighbor number cell is full
-isNotBulb([X, Y], Bulbs) :- 
-	Xg is X+1, numberCell([Xg, Y, Number]), isFullBulb([Xg, Y, Number], Bulbs);
-	Xl is X-1, numberCell([Xl, Y, Number]), isFullBulb([Xl, Y, Number], Bulbs);
-	Yg is Y+1, numberCell([X, Yg, Number]), isFullBulb([X, Yg, Number], Bulbs);
-	Yl is Y-1, numberCell([X, Yl, Number]), isFullBulb([X, Yl, Number], Bulbs).
+% Is not Bulb if a neighbor number cell was full
+isLighted([X, Y], Bulbs) :- 
+	R is X+1, numberCell([R, Y, Number]), isFullBulb([R, Y, Number], Bulbs); 
+	L is X-1, numberCell([L, Y, Number]), isFullBulb([L, Y, Number], Bulbs);
+	U is Y+1, numberCell([X, U, Number]), isFullBulb([X, U, Number], Bulbs);
+	D is Y-1, numberCell([X, D, Number]), isFullBulb([X, D, Number], Bulbs).
 
 %%%%%%%%%% Main algorithm %%%%%%%%%%
 % If all whiteCell is Lighted or Bulb, end algorithm
-solve([], _, _, _).
+solve([], _, _).
 	
 % If whiteCell is Lighted, put it to Lighted array
-solve([[X, Y] | WhiteCells], Lighted, Bulbs, NotBulbs) :-
+solve([[X, Y] | WhiteCells], Lighted, Bulbs) :-
 	isLighted([X, Y], Bulbs),
 	append(Lighted, [[X, Y]], NewLighted),
-	solve(WhiteCells, NewLighted, Bulbs, NotBulbs).
-
-% If whiteCell is Lighted, put it to Lighted array
-solve([[X, Y] | WhiteCells], Lighted, Bulbs, NotBulbs) :-
-	isNotBulb([X, Y], Bulbs),
-	append(NotBulbs, [[X, Y]], NewNotBulbs),
-	append(WhiteCells, [[X, Y]], NewWhiteCells),
-	solve(NewWhiteCells, Lighted, Bulbs, NewNotBulbs).
+	solve(WhiteCells, NewLighted, Bulbs).
 
 % If whiteCell is Bulb, put it to Bulbs array
-solve([[X, Y] | WhiteCells], Lighted, Bulbs, NotBulbs) :-
-	isBulb([X, Y], Lighted, NotBulbs),
+solve([[X, Y] | WhiteCells], Lighted, Bulbs) :-
+	isBulb([X, Y], Lighted),
 	write(X), write(' '), write(Y), nl, 
 	append(Bulbs, [[X, Y]], NewBulbs),
-	solve(WhiteCells, Lighted, NewBulbs, NotBulbs).
+	solve(WhiteCells, Lighted, NewBulbs).
 
 % If not determined this cell, put it to last and determined later
-solve([[X, Y] | WhiteCells], Lighted, Bulbs, NotBulbs) :-
+solve([[X, Y] | WhiteCells], Lighted, Bulbs) :-
 	append(WhiteCells, [[X, Y]], NewWhiteCells),
-	solve(NewWhiteCells, Lighted, Bulbs, NotBulbs).
+	solve(NewWhiteCells, Lighted, Bulbs).
 
 %%%%%%%%%% Call Main funciton %%%%%%%%%%
 lightup(WhiteCells) :-
-	solve(WhiteCells, [], [], []).
+	solve(WhiteCells, [], []).
